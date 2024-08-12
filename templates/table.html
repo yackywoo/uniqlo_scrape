@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block head %} 
+
+{% endblock %}
+
+{% block body %} 
+<div>
+    <form action = "/table" method = "POST">
+        <label for="input_PID"> Enter product ID: </label>
+        <input type="text" id="input_PID" name="input_PID" placeholder="E000000-000">
+        <input type="submit">
+    </form>
+</div>
+<form id = "itemForm" method="POST" action="/add_items"> 
+<div> 
+    <h2> Item: [{{ prod_name }}]  </h2>
+    <h2> PID: [{{ PID }}]  </h2>
+    {% if prod_name != "Invalid Product ID" %}
+    
+        <button> Add Selected </button> 
+        <table>
+            
+            <h3> <a href = "{{ main_url }}" target="_blank"> Prices Table </a> </h3>
+            <tr>
+                <th> Colors </th>
+                {% for size in size_tuple %}
+                    <th> {{ size }} </th>
+                {% endfor %}
+            </tr>
+
+            {% for color, availabilities in result %}
+            <tr>
+                <td> <b> {{ color }} </b> </td>
+                {% for size in size_tuple %}
+                    {% set item = availabilities[size] %}
+                    {% if db.session.query(Entry).filter_by(l2Id=item.l2id).first() != None %}
+                        <td> <b> In Tracker </b> </td>
+                    {% elif item.status != 'N/A' and item.status != 'Out of stock' %}
+                        <td>
+                            <input type="checkbox" name = 'items' id = "{{ PID }}-{{ color }}-{{ size }}" value ="{{ PID }}-{{ color }}-{{ size }}">
+                            <input type="hidden" name = 'p_name_{{ PID }}-{{ color }}-{{ size }}' value = "{{ prod_name }}"> 
+                            <input type="hidden" name = 'p_color_{{ PID }}-{{ color }}-{{ size }}' value = "{{ color }}">
+                            <input type="hidden" name = 'p_size_{{ PID }}-{{ color }}-{{ size }}' value = "{{ size }}">
+                            <input type="hidden" name = 'p_status_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.status }}">
+                            <input type="hidden" name = 'p_curr_price_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.price }}">
+                            <input type="hidden" name = 'p_l2id_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.l2id }}">
+                            <input type="hidden" name = 'p_link_{{ PID }}-{{ color }}-{{ size }}' value = "{{ main_url }}">
+                            <label for="{{ PID }}-{{ color }}-{{ size }}">
+                                {% if item.status == 'Low stock' %}
+                                    {{ item.price }}
+                                {% elif item.status == 'In stock' %}
+                                    {{ item.price }} 
+                                {% endif %}
+                            </label>
+                        </td>                        
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    
+    </div>
+    {% endif %}
+
+    {% if sale_group_exists_01 %}
+    <div>
+        <table>
+            <h3> <a href = "{{ sale_url_01 }}"> Sale Group Table </a></h3>
+            <tr>
+                <th> Colors </th>
+                {% for size in sale_group_size_tuple_01 %}
+                    <th> {{ size }} </th>
+                {% endfor %}
+            </tr>
+
+            {% for color, availabilities in sale_group_result_01 %}
+            <tr>
+                <td> <b> {{ color }} </b> </td>
+                {% for size in sale_group_size_tuple_01 %}
+                    {% set item = availabilities[size] %}
+                    {% if db.session.query(Entry).filter_by(l2Id=item.l2id).first() != None %}
+                        <td> <b> In Tracker </b> </td>
+                    {% elif item.status != 'N/A' and item.status != 'Out of stock' %}
+                        <td>
+                            <input type="checkbox" name = 'items' id = "{{ PID }}-{{ color }}-{{ size }}" value ="{{ PID }}-{{ color }}-{{ size }}">
+                            <input type="hidden" name = 'p_name_{{ PID }}-{{ color }}-{{ size }}' value = "{{ prod_name }}"> 
+                            <input type="hidden" name = 'p_color_{{ PID }}-{{ color }}-{{ size }}' value = "{{ color }}">
+                            <input type="hidden" name = 'p_size_{{ PID }}-{{ color }}-{{ size }}' value = "{{ size }}">
+                            <input type="hidden" name = 'p_status_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.status }}">
+                            <input type="hidden" name = 'p_curr_price_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.price }}">
+                            <input type="hidden" name = 'p_l2id_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.l2id }}">
+                            <input type="hidden" name = 'p_link_{{ PID }}-{{ color }}-{{ size }}' value = "{{ sale_url_01 }}">
+                            <label for="{{ PID }}-{{ color }}-{{ size }}">
+                                {% if item.status == 'Low stock' %}
+                                    {{ item.price }}
+                                {% elif item.status == 'In stock' %}
+                                    {{ item.price }} 
+                                {% endif %}
+                            </label>
+                        </td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+        
+
+    <div>
+    {% if sale_group_exists_02 %}
+        <div>
+            <table>
+                <h3> <a href = "{{ sale_url_02 }}"> Sale Group Table </a></h3>
+                <tr>
+                    <th> Colors </th>
+                    {% for size in sale_group_size_tuple_02 %}
+                        <th> {{ size }} </th>
+                    {% endfor %}
+                </tr>
+
+                {% for color, availabilities in sale_group_result_02 %}
+                <tr>
+                    <td> <b> {{ color }} </b> </td>
+                    {% for size in sale_group_size_tuple_02 %}
+                        {% set item = availabilities[size] %}
+                        {% if db.session.query(Entry).filter_by(l2Id=item.l2id).first() != None %}
+                            <td> <b> In Tracker </b> </td>
+                        {% elif item.status != 'N/A' and item.status != 'Out of stock' %}
+                            <td>
+                                <input type="checkbox" name = 'items' id = "{{ PID }}-{{ color }}-{{ size }}" value ="{{ PID }}-{{ color }}-{{ size }}">
+                                <input type="hidden" name = 'p_name_{{ PID }}-{{ color }}-{{ size }}' value = "{{ prod_name }}"> 
+                                <input type="hidden" name = 'p_color_{{ PID }}-{{ color }}-{{ size }}' value = "{{ color }}">
+                                <input type="hidden" name = 'p_size_{{ PID }}-{{ color }}-{{ size }}' value = "{{ size }}">
+                                <input type="hidden" name = 'p_status_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.status }}">
+                                <input type="hidden" name = 'p_curr_price_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.price }}">
+                                <input type="hidden" name = 'p_l2id_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.l2id }}">
+                                <input type="hidden" name = 'p_link_{{ PID }}-{{ color }}-{{ size }}' value = "{{ sale_url_02 }}">
+                                <label for="{{ PID }}-{{ color }}-{{ size }}">
+                                    {% if item.status == 'Low stock' %}
+                                        {{ item.price }}
+                                    {% elif item.status == 'In stock' %}
+                                        {{ item.price }} 
+                                    {% endif %}
+                                </label>
+                            </td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            
+        </form>
+    </div>
+    {% endif %}
+</form>
+</div>
+{% endif %}
+{% endblock %}
+
