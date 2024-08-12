@@ -1,7 +1,7 @@
 # Uniqlo Scraper
 Scrapes UNIQLO for price &amp; stock status for a given Product ID
 
-# How to install & use
+# How to 
  1. Configure 'sender_email_creds.py'. YouTube link inside, this will be the email address that SENDS notifications.
  2. Add a receiver email* by running 'app.py', you will be prompted to enter an email address.
     - Receiver email can be manually changed in the 'target_email.txt' file
