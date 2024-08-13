@@ -1,7 +1,8 @@
 # Uniqlo Scraper
-Scrapes UNIQLO for price &amp; stock status for a given Product ID
+ * Scrapes UNIQLO API for price &amp; stock status for a given Product ID
 
-# How To 
+
+# How-To 
  0. `pip install -r "requirements.txt"` to install all dependencies.
  1. Configure 'sender_email_creds.py'. YouTube link inside, this will be the email address that SENDS notifications.
  2. Add a receiver email* by running `python3 app.py`, you will be prompted to enter an email address.
@@ -11,6 +12,8 @@ Scrapes UNIQLO for price &amp; stock status for a given Product ID
     - Anything that is completely out of stock will not appear
  5. At the homepage you'll see all tracked products along with the size and color that have been added.
  6. By clicking 'Update All' if a change in the price or stock is detected a notification email will be sent to the email entered in step 2.
+    - This is the only way notifications are sent, updates are not retrieved automatically
  7. Avoid spamming 'Update All' button.
  8. Shutdown the webpage with (CTRL + C).
 
+Disclaimer : For educational purposes only
