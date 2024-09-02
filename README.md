@@ -16,12 +16,12 @@ This project is a web application that tracks product availability, prices, and 
    cd uniqlo_scrape
 2. **Create and activate a virtual environment**:
    `python -m venv venv`\
-   Activate virtual environment:\
+   Activate virtual environment:
 
-      Linux:\ 
+      - Linux:\
       `source venv/bin/activate`
       
-      Windows:\
+      - Windows:\
       `venv\Scripts\activate`
 3. **Install the required dependencies**:
    `pip install -r requirements.txt`
