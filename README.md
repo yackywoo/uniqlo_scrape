@@ -16,7 +16,7 @@ This project is a web application that tracks product availability, prices, and 
    cd uniqlo_scrape
 2. **Create and activate a virtual environment**:
    `python -m venv venv`\
-   Activate virtual environment:
+   Activate virtual environment:\
       Linux\ 
       `source venv/bin/activate`
       
@@ -31,4 +31,5 @@ This project is a web application that tracks product availability, prices, and 
 6. **Access the web interface**:
    Open your web browser and goto `http://127.0.0.1:5000/` to start using the tracker.
 
-Disclaimer : For educational purposes only
+## Disclaimer 
+For educational purposes only.
