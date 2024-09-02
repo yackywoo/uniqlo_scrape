@@ -14,8 +14,12 @@
 </div>
 <form id = "itemForm" method="POST" action="/add_items"> 
 <div> 
-    <h2> Item: [{{ prod_name }}]  </h2>
-    <h2> PID: [{{ PID }}]  </h2>
+    
+    <h2 style="display: inline-block; margin-bottom: 0;"> Item: [{{ prod_name }}]  </h2>
+    {% if sale_status == True %}
+        <h2 style="color:crimson; display: inline-block; margin-bottom: 0;"> (ON SALE) </h2>
+    {% endif %}
+    <h2 style = "vertical-align: top"> PID: [{{ PID }}]  </h2>
     {% if prod_name != "Invalid Product ID" %}
     
         <button> Add Selected </button> 
@@ -46,6 +50,8 @@
                             <input type="hidden" name = 'p_curr_price_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.price }}">
                             <input type="hidden" name = 'p_l2id_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.l2id }}">
                             <input type="hidden" name = 'p_link_{{ PID }}-{{ color }}-{{ size }}' value = "{{ main_url }}">
+                            <input type="hidden" name = 'p_sale_status_{{ PID }}-{{ color }}-{{ size }}' value = "{{ sale_status }}">
+                            <input type="hidden" name = 'p_img_link_{{ PID }}-{{ color }}-{{ size }}' value = "{{ img_link }}">
                             <label for="{{ PID }}-{{ color }}-{{ size }}">
                                 {% if item.status == 'Low stock' %}
                                     {{ item.price }}
@@ -93,6 +99,8 @@
                             <input type="hidden" name = 'p_curr_price_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.price }}">
                             <input type="hidden" name = 'p_l2id_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.l2id }}">
                             <input type="hidden" name = 'p_link_{{ PID }}-{{ color }}-{{ size }}' value = "{{ sale_url_01 }}">
+                            <input type="hidden" name = 'p_sale_status_{{ PID }}-{{ color }}-{{ size }}' value = "True">
+                            <input type="hidden" name = 'p_img_link_{{ PID }}-{{ color }}-{{ size }}' value = "{{ img_link }}">
                             <label for="{{ PID }}-{{ color }}-{{ size }}">
                                 {% if item.status == 'Low stock' %}
                                     {{ item.price }}
@@ -138,6 +146,8 @@
                                 <input type="hidden" name = 'p_status_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.status }}">
                                 <input type="hidden" name = 'p_curr_price_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.price }}">
                                 <input type="hidden" name = 'p_l2id_{{ PID }}-{{ color }}-{{ size }}' value = "{{ item.l2id }}">
+                                <input type="hidden" name = 'p_sale_status_{{ PID }}-{{ color }}-{{ size }}' value = "True">
+                                <input type="hidden" name = 'p_img_link_{{ PID }}-{{ color }}-{{ size }}' value = "{{ img_link }}">
                                 <input type="hidden" name = 'p_link_{{ PID }}-{{ color }}-{{ size }}' value = "{{ sale_url_02 }}">
                                 <label for="{{ PID }}-{{ color }}-{{ size }}">
                                     {% if item.status == 'Low stock' %}

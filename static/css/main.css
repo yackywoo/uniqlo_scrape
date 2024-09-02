@@ -36,7 +36,8 @@ th {
     padding: 1px 12px;
 }
 .stock-status, .stock-price {
-    display: inline;
+    display: inline-block; 
+    margin-bottom: 0;
 }
 body {
     background-color: rgba(0, 0, 0, 0.336)
@@ -44,4 +45,22 @@ body {
 h3 {
     margin:0;
     display: inline-block;
+}
+.green {
+    margin: 0;
+    padding: 5px;
+    background-color: #d4edda;
+    color: #155724;
+}
+.yellow {
+    margin: 0;
+    padding: 5px;
+    background-color: #ecedd4;
+    color: #575615;
+}
+.red {
+    margin: 0;
+    padding: 5px;
+    background-color: #edd4d4;
+    color: #571515;
 }

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 import scraper
@@ -22,12 +22,13 @@ class Entry (db.Model) :
     prod_size = db.Column(db.String(10))
     prod_status = db.Column(db.String(15))
     prod_curr_price = db.Column(db.String(8))
-    prod_max_price = db.Column(db.String(8))
-    prod_min_price = db.Column(db.String(8))
+    img_link = db.Column(db.String(300))
+    sale_status = db.Column(db.String(8)) #scraper fnuction returns bool but this stored as string
     url = db.Column(db.String(300))
     date = db.Column(db.DateTime(timezone=True), default = func.now())
 
 app = Flask(__name__)
+app.secret_key = "Uniqlo"
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{DB_NAME}"
 db.init_app(app)
 
@@ -42,11 +43,13 @@ def index() :
     entries = Entry.query.all()
     
     pid_set = set()
+    img_dict = dict()
     for entry in entries : 
         pid_set.add(entry.PID)
+        img_dict.update({entry.PID : entry.img_link})
     pid_list = list(pid_set)
-
-    return render_template('index.html', entries=entries, pid_list = pid_list)
+    
+    return render_template('index.html', entries=entries, pid_list = pid_list, img_dict = img_dict)
 
 #page to display scraped data
 @app.route('/table', methods=['POST','GET'])
@@ -57,6 +60,8 @@ def show_table() :
         size_tuple = tuple()
         result = list()
         main_url = ''
+        sale_status = False
+        img_link = 'https://static-00.iconduck.com/assets.00/unavailable-icon-2048x2048-eyjkqwgr.png'
 
         #sale group variables returned
         sale_group_exists_01 = False
@@ -79,6 +84,8 @@ def show_table() :
             size_tuple = scraper.get_sizes(size_list)
             result = scraper.product_info(PID,'00')
             main_url = 'https://www.uniqlo.com/us/en/products/' + PID + '/00'
+            sale_status = scraper.product_sale_status(PID)
+            img_link = scraper.product_img(PID)
 
             #sale group 01 info
             sale_group_exists_01 = scraper.sale_group_exist(PID, '01')
@@ -87,6 +94,7 @@ def show_table() :
                 sale_group_size_tuple_01 = scraper.get_sizes(sale_group_size_list_01)
                 sale_group_result_01 = scraper.product_info(PID,'01')
                 sale_url_01 = 'https://www.uniqlo.com/us/en/products/' + PID + '/01'
+                img_link = scraper.product_img(PID)
 
             #sale group 02 info
             sale_group_exists_02 = scraper.sale_group_exist(PID, '02')
@@ -94,7 +102,8 @@ def show_table() :
                 sale_group_size_list_02 = scraper.get_size_list(PID, '02')
                 sale_group_size_tuple_02 = scraper.get_sizes(sale_group_size_list_02)
                 sale_group_result_02 = scraper.product_info(PID,'02')
-                sale_url_02 = 'https://www.uniqlo.com/us/en/products/' + PID + '/02'    
+                sale_url_02 = 'https://www.uniqlo.com/us/en/products/' + PID + '/02' 
+                img_link = scraper.product_img(PID)   
         except: 
             IndexError
             prod_name = "Invalid Product ID"
@@ -113,6 +122,8 @@ def show_table() :
                            main_url = main_url, 
                            sale_url_01 = sale_url_01,
                            sale_url_02 = sale_url_02,
+                           sale_status = sale_status,
+                           img_link = img_link,
                            db = db,
                            Entry = Entry
                            )
@@ -129,6 +140,8 @@ def add_items() :
         p_size = request.form.get(f'p_size_{items}')
         p_status = request.form.get(f'p_status_{items}')
         p_curr_price = request.form.get(f'p_curr_price_{items}')
+        p_img_link = request.form.get(f'p_img_link_{items}')
+        p_sale_status = request.form.get(f'p_sale_status_{items}')
         p_url = request.form.get(f'p_link_{items}')
         
         new_entry = Entry(l2Id = p_l2id,
@@ -138,13 +151,13 @@ def add_items() :
                         prod_size = p_size,
                         prod_status = p_status,
                         prod_curr_price = p_curr_price,
-                        prod_max_price = '0',
-                        prod_min_price = '0',
+                        img_link = p_img_link,
+                        sale_status = p_sale_status,
                         url = p_url
                         )
         db.session.add(new_entry)
         db.session.commit()
-        print(f"ADDED: {p_name} | {p_color} | {p_size} = ({p_status}, {p_curr_price})")
+        print(f"ADDED: {p_name} | {p_color} | sale = {p_sale_status} | {p_size} = ({p_status}, {p_curr_price})")
         
         
     return redirect(url_for('index'))
@@ -156,11 +169,12 @@ def remove() :
     
     prod_name_to_remove = request.form.get('remove_name')
     prod_color_to_remove = request.form.get('remove_color')
+    prod_status_to_remove = request.form.get('remove_status')
     prod_size_to_remove = request.form.get('remove_size')
 
     db.session.delete(entry_to_remove)
     db.session.commit()
-    print(f"REMOVED: {prod_name_to_remove} | color: {prod_color_to_remove} | size: {prod_size_to_remove}")
+    print(f"REMOVED: {prod_name_to_remove} | {prod_color_to_remove} | sale = {prod_status_to_remove} | size = {prod_size_to_remove}")
 
     return redirect(url_for('index'))
 
@@ -181,19 +195,43 @@ def update_all() :
         updated_prod_status = updated_info[0]
         updated_curr_price = updated_info[1]
 
-        #doing the check first before updating entry
-        if entry.prod_status != updated_prod_status or entry.prod_curr_price != updated_curr_price:
-            scraper.send_notif(entry, updated_prod_status, updated_curr_price)
+        #UPDATE sale status -> depends on group, scraper function only works for group 00
+        if prod_group == '00' :
+            updated_sale_status = str(scraper.product_sale_status(prod_PID))
+        elif prod_group == '01' or prod_group == '02' :
+            updated_sale_status = 'True'
+
+        # MESSAGE FLASHING) if change detected flash message for (name, color, size -> change detected) 
+
+        #green = price drop / sale change from False to True / stock change to 'in stock'
+        if float(updated_curr_price[1:]) < float(entry.prod_curr_price[1:]) : 
+            flash(f"{prod_name} | Size: ({prod_size}) | Col: ({prod_color}) | PRICE UPDATE = {entry.prod_curr_price} -> {updated_curr_price}", 'green')
+        if updated_sale_status == 'True' and entry.sale_status != 'True' :
+            flash(f"{prod_name} | Size: ({prod_size}) | Col: ({prod_color}) | SALE UPDATE = {entry.prod_curr_price} -> {updated_curr_price}", 'green')
+        if updated_prod_status == 'In stock' and entry.prod_status != 'In stock' : 
+            flash(f"{prod_name} | Size: ({prod_size}) | Col: ({prod_color}) | STOCK UPDATE = {entry.prod_status} -> {updated_prod_status}", 'green')
+        
+        #yellow = stock change to 'low stock' 
+        if updated_prod_status == 'Low stock' and entry.prod_status != 'Low stock' :
+            flash(f"{prod_name} | Size: ({prod_size}) | Col: ({prod_color}) | STOCK UPDATE = {entry.prod_status} -> {updated_prod_status}", 'yellow')
+        
+        #red = price increase / sale change from True to False / stock change to 'out of stock'
+        if float(updated_curr_price[1:]) > float(entry.prod_curr_price[1:]) : 
+            flash(f"{prod_name} | Size: ({prod_size}) | Col: ({prod_color}) | PRICE UPDATE = {entry.prod_curr_price} -> {updated_curr_price}", 'red')
+        if updated_sale_status == 'False' and entry.sale_status != 'False' :
+            flash(f"{prod_name} | Size: ({prod_size}) | Col: ({prod_color}) | SALE UPDATE = {entry.prod_curr_price} -> {updated_curr_price}", 'red')
+        if updated_prod_status == 'Out of stock' and entry.prod_status != 'Out of stock' : 
+            flash(f"{prod_name} | Size: ({prod_size}) | Col: ({prod_color}) | STOCK UPDATE = {entry.prod_status} -> {updated_prod_status}", 'red')
 
         entry.prod_status = updated_info[0]
         entry.prod_curr_price = updated_info[1]
+        entry.sale_status = updated_sale_status
 
         db.session.commit()
-        print(f"UPDATE: {prod_name} | {prod_color} | {prod_size} = {updated_info}" )
+        print(f"UPDATE: {prod_name} | {prod_color} | sale = {updated_sale_status} | {prod_size} = {updated_info}" )
 
     return redirect(url_for('index'))
 
 
 if __name__ == "__main__" :
-    scraper.get_target_email()
     app.run()

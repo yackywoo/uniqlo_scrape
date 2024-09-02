@@ -1,19 +1,33 @@
-# Uniqlo Scraper
- * Scrapes UNIQLO API for price &amp; stock status for a given Product ID
+# Uniqlo Product Tracker
 
+This project is a web application that tracks product availability, prices, and sale statuses from Uniqlo's online store. It scrapes data using the Uniqlo API, stores the information in a local SQLite database, and allows users to monitor changes over time. The app is built using Flask for the web framework and SQLAlchemy for database management.
 
-# How-To 
- 0. `pip install -r "requirements.txt"` to install all dependencies.
- 1. Configure 'sender_email_creds.py'. YouTube link inside, this will be the email address that SENDS notifications.
- 2. Add a receiver email* by running `python3 app.py`, you will be prompted to enter an email address.
-    - Receiver email can be manually changed in the 'target_email.txt' file
- 3. Head over to 'http://127.0.0.1:5000/' where you can enter the 'product ID' (ex: E466334-000).
- 4. Once entered you'll be redirected to a tables page where you can select whichever color / size combination*, click on 'Add Selected' to begin tracking.
-    - Anything that is completely out of stock will not appear
- 5. At the homepage you'll see all tracked products along with the size and color that have been added.
- 6. By clicking 'Update All' if a change in the price or stock is detected a notification email will be sent to the email entered in step 2.
-    - This is the only way notifications are sent, updates are not retrieved automatically
- 7. Avoid spamming 'Update All' button.
- 8. Shutdown the webpage with (CTRL + C).
+## Features
+
+- **Product Tracking**: Track Uniqlo products by their Product ID (PID) and view details such as price, availability, and sale status.
+- **Sale Group Monitoring**: Detects and displays product variations, including different color groups and sizes.
+- **Automatic Updates**: Automatically updates product information and highlights changes in price, stock, and sale status.
+- **User-Friendly Interface**: View tracked products and their details through a simple web interface.
+
+## Installation
+1. **Clone the repository**: 
+   `git clone https://github.com/your-username/uniqlo-product-tracker.git`
+   `cd uniqlo-product-tracker`
+2. **Create and activate a virtual environment**:
+   `python -m venv venv`
+   Activate virtual environment: 
+      ```Linux 
+      source venv/bin/activate
+      
+      ```Windows
+      venv\Scripts\activate
+3. **Install the required dependencies**:
+   `pip install -r requirements.txt`
+4. **Set up the database**: 
+   The database is automatically created when you run the Flask app for the first time.
+5. **Run the application**: 
+   `python app.py`
+6. **Access the web interface**:
+   Open your web browser and goto `http://127.0.0.1:5000/` to start using the tracker.
 
 Disclaimer : For educational purposes only

@@ -31,6 +31,68 @@ def product_name(PID) :
 
     return name
 
+def product_sale_status(PID) : 
+    #get sale status
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0',
+        'Accept': '*/*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Referer': 'https://www.uniqlo.com/us/en/products/' + PID + '/',
+        'DNT': '1',
+        'Sec-GPC': '1',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'Connection': 'keep-alive',
+        'Priority': 'u=4',
+    } 
+    url = 'https://www.uniqlo.com/us/api/commerce/v5/en/products?productIds=' + PID
+    response = requests.get(url, headers=headers)
+    response = response.json()
+
+    try: 
+        sale_status = response['result']['items'][0]['prices']['promo']
+    except: 
+        #index error occurs when OOS. so return false by default
+        IndexError
+        return False
+
+    if sale_status != None : 
+        #if promo section exists then sale exists and RETURN TRUE else FALSE
+        return True
+    else :
+        return False
+
+def product_img(PID) : 
+    #get the first product img
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0',
+        'Accept': '*/*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Referer': 'https://www.uniqlo.com/us/en/products/' + PID + '/',
+        'DNT': '1',
+        'Sec-GPC': '1',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'Connection': 'keep-alive',
+        'Priority': 'u=4',
+    } 
+    url = 'https://www.uniqlo.com/us/api/commerce/v5/en/products?productIds=' + PID
+    response = requests.get(url, headers=headers)
+    response = response.json()
+
+    try: 
+        colors = response['result']['items'][0]['images']['main']
+        color_list = list(colors)
+        first_color = color_list[0]
+        img_link = colors[first_color]['image']
+    except:
+        IndexError
+        img_link = 'https://static-00.iconduck.com/assets.00/unavailable-icon-2048x2048-eyjkqwgr.png'
+
+    return img_link
+
 def product_info(PID, group) :
     color_dict = {
         '00' : 'WHITE',
@@ -93,7 +155,7 @@ def product_info(PID, group) :
     for l2s in response['result']['l2s'] : 
         avail_colors.add(l2s['color']['displayCode'])
         avail_sizes.add(l2s['size']['displayCode'])
-        size_list.append(l2s['size']['displayCode']) #for later
+        size_list.append(l2s['size']['displayCode'])
 
         #generate key because some of thbe PID's aren't consistent in uniqlo's API
         key = f"{PID[1:7]}-{l2s['color']['displayCode']}-{l2s['size']['displayCode']}-000"
@@ -124,11 +186,20 @@ def product_info(PID, group) :
         stock_status = response['result']['stocks'][l2id]['statusLocalized']
         curr_price = response['result']['prices'][l2id]['base']['value']
         curr_price = "$" + format(curr_price, '.2f')
-        l2_stock_price.update({l2id : [sizes ,stock_status, curr_price]})
+        
+        
+        if response['result']['prices'][l2id]['promo'] == 'null' or response['result']['prices'][l2id]['promo'] == None :
+            #if no sale
+            sale_status = False
+        else :
+            sale_status = True 
+        #print(f"{l2id}: {response['result']['prices'][l2id]['promo']} | sale : {sale_status}")
+        l2_stock_price.update({l2id : [sizes ,stock_status, curr_price, sale_status]})
 
     l2_size = list()
     l2_stock = list()
     l2_price = list()
+    l2_sale = list()
     l2id_list = list()
 
     #group size, stock and price based on color
@@ -136,15 +207,18 @@ def product_info(PID, group) :
         size_temp = []
         stock_temp = []
         price_temp = []
+        sale_temp = []
         l2id_temp = []
         for l2Id in each_color :
             size_temp.append(l2_stock_price[l2Id][0]) 
             stock_temp.append(l2_stock_price[l2Id][1])
             price_temp.append(l2_stock_price[l2Id][2])
+            sale_temp.append(l2_stock_price[l2Id][3])
             l2id_temp.append(l2Id)
         l2_size.append(size_temp)
         l2_stock.append(stock_temp)
         l2_price.append(price_temp)
+        l2_sale.append(sale_temp)
         l2id_list.append(l2id_temp)
 
     #converting available color codes into english 
@@ -159,13 +233,13 @@ def product_info(PID, group) :
 
     #stock_price groups each color by their stock,price combination (positionally)
     stock_price = list()
-    for sizes, stocks, prices, l2ids in zip(l2_size, l2_stock, l2_price, l2id_list):
+    for sizes, stocks, prices, sales, l2ids in zip(l2_size, l2_stock, l2_price, l2_sale, l2id_list):
         temp = list()
-        for size, stock, price, l2id in zip(sizes, stocks, prices, l2ids) : 
-            temp.append([size, stock, price, l2id])
+        for size, stock, price, sale, l2id in zip(sizes, stocks, prices, sales, l2ids) : 
+            temp.append([size, stock, price, sale, l2id])
         stock_price.append(temp)
     
-    #result = list of pairs containing (color, [size,stock,price,l2id]) -> for all available sizes)
+    #result = list of pairs containing (color, [size,stock,price,sale,l2id]) -> for all available sizes)
     result = [(color, stock_price_list) for color, stock_price_list in zip(color_list, stock_price)]
 
 
@@ -174,9 +248,9 @@ def product_info(PID, group) :
     size_tuple = get_sizes(size_list)
     for color, availabilities in result :
                 #create skeleton for every size 
-                availability_dict = {size: {'status': 'N/A', 'price': '', 'l2id': ''} for size in size_tuple}
-                for size, status, price, l2id in availabilities : 
-                    availability_dict[size] = {'status': status, 'price': price, 'l2id': l2id}
+                availability_dict = {size: {'status': 'N/A', 'price': '', 'sale': '','l2id': ''} for size in size_tuple}
+                for size, status, price, sale, l2id in availabilities : 
+                    availability_dict[size] = {'status': status, 'price': price, 'sale': sale, 'l2id': l2id}
                 real_result.append((color, availability_dict))
 
     return real_result
@@ -308,6 +382,7 @@ def update_by_l2Id(l2Id, PID, group) :
 
     return (updated_stock_status, updated_price)
 
+''' (not going to use email notifs anymore)
 def get_target_email() : 
     file = open("target_email.txt", "r")
 
@@ -323,7 +398,7 @@ def get_target_email() :
             file.close()
         else : 
             get_target_email()
-    
+
 def send_notif(entry, updated_status, updated_price) :
     file = open("target_email.txt", "r")
     target_email = file.read()
@@ -345,13 +420,15 @@ def send_notif(entry, updated_status, updated_price) :
     server.starttls()
     server.login(sender_email, sender_pass)
     server.sendmail(sender_email, target_email, text)
+'''
 
 if __name__ == "__main__" :
     
     PID = input("PID: ")
     p_name = product_name(PID) #returns name
     print(p_name)
-    
     print(product_info(PID, '00'))
+
+ 
 
 
