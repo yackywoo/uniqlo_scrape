@@ -11,16 +11,17 @@ This project is a web application that tracks product availability, prices, and 
 
 ## Installation
 1. **Clone the repository**: 
-   `git clone https://github.com/your-username/uniqlo-product-tracker.git`\
-   `cd uniqlo-product-tracker`
+   ```
+   git clone https://github.com/your-username/uniqlo-product-tracker.git
+   cd uniqlo_scrape
 2. **Create and activate a virtual environment**:
    `python -m venv venv`\
-   Activate virtual environment:\ 
-      ```Linux 
-      source venv/bin/activate
+   Activate virtual environment:
+      Linux\ 
+      `source venv/bin/activate`
       
-      ```Windows
-      venv\Scripts\activate
+      Windows\
+      `venv\Scripts\activate`
 3. **Install the required dependencies**:
    `pip install -r requirements.txt`
 4. **Set up the database**: 
