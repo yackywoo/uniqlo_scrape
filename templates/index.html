@@ -31,54 +31,56 @@
             <button type="submit" style="background-color:rgba(77, 212, 84, 0.685); border-radius: 5px; margin-left: 1%;  ;">Update All</button>  
         </h2> 
     </form>
+        <div class = "card_container"> 
             {% for PIDs in pid_list %}
-            <div class ="card1">
-                <div class = "container">
-                {% if PIDs in img_dict %}
-                    <div style = "display: block; margin: 10px; text-align: center; border-radius: 20px;">
-                        <img src = "{{ img_dict[PIDs] }}" width = "300" height = "300"> 
-                    </div>
-                {% endif %}
-                {% for entry in entries %}
-                    {% if PIDs == entry.PID %}
-
-                        <h3> <a href=' {{entry.url}}' target="_blank"> {{entry.prod_name}} </a>|  Size:  ({{entry.prod_size}}) | Col: ({{entry.prod_color}})</h3>                    
-                        <form id = "remove" action = "/remove" method = "POST" style = "display: inline-block">
-                            <button type="submit" style="background-color:rgba(255, 0, 0, 0.486); border-radius: 5px;" name = 'remove' value = "{{ entry.l2Id }}"> Remove </button>
-                            <input type = "hidden" name = remove_name value = "{{entry.prod_name}}">
-                            <input type = "hidden" name = remove_size value = "{{entry.prod_size}}">
-                            <input type = "hidden" name = remove_status value = "{{entry.sale_status}}">
-                            <input type = "hidden" name = remove_color value = "{{entry.prod_color}}">
-                        </form>
-                        
-                        
-                        <div class="card2"> 
-                            <p> <b>STOCK</b> : 
-                            {% if entry.prod_status == "Out of stock" %}
-                                <span class ="stock-status" style="font-weight: bold; color:crimson"> Out of Stock</span>
-                            {% elif entry.prod_status == "Low stock" %}
-                                <span class ="stock-status" style="color:rgba(116, 124, 5, 0.993)"> Low Stock </span>
-                            {% elif entry.prod_status == "In stock"%}
-                                <span class ="stock-status"> In Stock </span>
-                            {% endif %}
-                            </p>
-
-                            <p> <b>PRICE</b> :  
-                                {% if entry.prod_curr_price == "" or entry.prod_curr_price == " " %}
-                                    <span class = "stock-price"> N/A </span>  
-                                {% else %} 
-                                    <span class = "stock-price"> {{ entry.prod_curr_price }} </span>
-                                    {% if entry.sale_status == "True" %}
-                                        <span style = "font-weight: bold; color:crimson;" class = "stock-price"> *SALE </span>
-                                    {% endif %}
-                                {% endif %}
-                            </p>
+                <div class ="card1">
+                    <div class = "container">
+                    {% if PIDs in img_dict %}
+                        <div style = "display: block; margin: 10px; text-align: center; border-radius: 20px;">
+                            <img src = "{{ img_dict[PIDs] }}" width = "300" height = "300"> 
                         </div>
                     {% endif %}
-                {% endfor %}
+                    {% for entry in entries %}
+                        {% if PIDs == entry.PID %}
+
+                            <h3> <a href=' {{entry.url}}' target="_blank"> {{entry.prod_name}} </a>|  Size:  ({{entry.prod_size}}) | Col: ({{entry.prod_color}})</h3>                    
+                            <form id = "remove" action = "/remove" method = "POST" style = "display: inline-block">
+                                <button type="submit" style="background-color:rgba(255, 0, 0, 0.486); border-radius: 5px;" name = 'remove' value = "{{ entry.l2Id }}"> Remove </button>
+                                <input type = "hidden" name = remove_name value = "{{entry.prod_name}}">
+                                <input type = "hidden" name = remove_size value = "{{entry.prod_size}}">
+                                <input type = "hidden" name = remove_status value = "{{entry.sale_status}}">
+                                <input type = "hidden" name = remove_color value = "{{entry.prod_color}}">
+                            </form>
+                            
+                            
+                            <div class="card2"> 
+                                <p> <b>STOCK</b> : 
+                                {% if entry.prod_status == "Out of stock" %}
+                                    <span class ="stock-status" style="font-weight: bold; color:crimson"> Out of Stock</span>
+                                {% elif entry.prod_status == "Low stock" %}
+                                    <span class ="stock-status" style="color:rgba(116, 124, 5, 0.993)"> Low Stock </span>
+                                {% elif entry.prod_status == "In stock"%}
+                                    <span class ="stock-status"> In Stock </span>
+                                {% endif %}
+                                </p>
+
+                                <p> <b>PRICE</b> :  
+                                    {% if entry.prod_curr_price == "" or entry.prod_curr_price == " " %}
+                                        <span class = "stock-price"> N/A </span>  
+                                    {% else %} 
+                                        <span class = "stock-price"> {{ entry.prod_curr_price }} </span>
+                                        {% if entry.sale_status == "True" %}
+                                            <span style = "font-weight: bold; color:crimson;" class = "stock-price"> *SALE </span>
+                                        {% endif %}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
                 </div>
-            </div>
             {% endfor %}
+        </div>
         
     
 

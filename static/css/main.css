@@ -64,3 +64,9 @@ h3 {
     background-color: #edd4d4;
     color: #571515;
 }
+.card_container {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+    gap: 10px;
+} 
